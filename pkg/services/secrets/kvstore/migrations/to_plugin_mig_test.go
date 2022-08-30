@@ -50,7 +50,7 @@ func TestPluginSecretMigrationService_MigrateToPlugin(t *testing.T) {
 // With fatal flag unset, do a migration with backwards compatibility disabled. When unified secrets are deleted, return an error on the first deletion
 // Should result in the fatal flag remaining unset
 func TestFatalPluginErr_MigrationTestWithErrorDeletingUnifiedSecrets(t *testing.T) {
-	p, err := secretskvs.SetupFatalCrashTest(t, false, false, true, true)
+	p, err := secretskvs.SetupFatalCrashTest(t, false, false, true)
 	assert.NoError(t, err)
 
 	migration := setupTestMigratorServiceWithDeletionError(t, p.SecretsKVStore, &mockstore.SQLStoreMock{
@@ -127,7 +127,7 @@ func setupTestMigratorServiceWithDeletionError(
 	kvstore kvstore.KVStore,
 ) *MigrateToPluginService {
 	t.Helper()
-	secretskvs.ResetPlugin()
+	secretskvs.TestCleanup(t)
 	cfg := secretskvs.SetupTestConfig(t)
 	secretsService := secretsManager.SetupTestService(t, fakes.NewFakeSecretsStore())
 	manager := secretskvs.NewFakeSecretsPluginManager(t, false)
@@ -145,6 +145,6 @@ func setupTestMigratorServiceWithDeletionError(
 	err := fallback.Set(context.Background(), orgId, str, str, "bogus")
 	require.NoError(t, err)
 	fallback.DeletionError(true)
-	secretskv.SetFallback(fallback)
+	secretskvs.ReplaceFallback(t, secretskv, fallback)
 	return migratorService
 }

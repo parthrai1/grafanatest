@@ -241,7 +241,6 @@ func SetupFatalCrashTest(
 	shouldFailOnStart bool,
 	isPluginErrorFatal bool,
 	isBackwardsCompatDisabled bool,
-	withFallback bool,
 ) (fatalCrashTestFields, error) {
 	t.Helper()
 	fatalFlagOnce = sync.Once{}
@@ -256,12 +255,7 @@ func SetupFatalCrashTest(
 	features := NewFakeFeatureToggles(t, isBackwardsCompatDisabled)
 	manager := NewFakeSecretsPluginManager(t, shouldFailOnStart)
 	svc, err := ProvideService(sqlStore, secretService, manager, kvstore, features, cfg)
-	t.Cleanup(func() {
-		fatalFlagOnce = sync.Once{}
-	})
-	if !withFallback {
-		svc.SetFallback(nil)
-	}
+	TestCleanup(t)
 	return fatalCrashTestFields{
 		SecretsKVStore: svc,
 		PluginManager:  manager,
@@ -288,7 +282,14 @@ func SetupTestConfig(t *testing.T) *setting.Cfg {
 	return &setting.Cfg{Raw: raw}
 }
 
-func ResetPlugin() {
-	fatalFlagOnce = sync.Once{}
-	startupOnce = sync.Once{}
+func TestCleanup(t *testing.T) {
+	t.Cleanup(func() {
+		fatalFlagOnce = sync.Once{}
+		startupOnce = sync.Once{}
+	})
+}
+
+func ReplaceFallback(t *testing.T, store FallbackedKVStore, fallback SecretsKVStore) {
+	t.Helper()
+	store.(*FallbackKVStore).fallback = fallback
 }
