@@ -29,7 +29,6 @@ type secretsKVStorePlugin struct {
 	secretsService                 secrets.Service
 	kvstore                        *kvstore.NamespacedKVStore
 	backwardsCompatibilityDisabled bool
-	fallback                       SecretsKVStore
 }
 
 // Get an item from the store
@@ -148,15 +147,6 @@ func (kv *secretsKVStorePlugin) GetAll(ctx context.Context) ([]Item, error) {
 	}
 
 	return parseItems(res.Items), err
-}
-
-func (kv *secretsKVStorePlugin) Fallback() SecretsKVStore {
-	return kv.fallback
-}
-
-func (kv *secretsKVStorePlugin) SetFallback(store SecretsKVStore) error {
-	kv.fallback = store
-	return nil
 }
 
 func parseKeys(keys []*smp.Key) []Key {
