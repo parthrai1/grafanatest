@@ -44,7 +44,7 @@ func TestHandleRequest(t *testing.T) {
 		}
 		sqlStore := sqlstore.InitTestDB(t)
 		secretsService := secretsmng.SetupTestService(t, fakes.NewFakeSecretsStore())
-		secretsStore := secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger"))
+		secretsStore := secretskvs.WithFallback(secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger")), nil)
 		datasourcePermissions := acmock.NewMockedPermissionsService()
 		dsService := datasourceservice.ProvideService(nil, secretsService, secretsStore, cfg, featuremgmt.WithFeatures(), acmock.New(), datasourcePermissions)
 		s := ProvideService(client, nil, dsService)

@@ -26,10 +26,9 @@ func ProvideService(
 	kvstore kvstore.KVStore,
 	features featuremgmt.FeatureToggles,
 	cfg *setting.Cfg,
-) (SecretsKVStore, error) {
+) (FallbackedKVStore, error) {
 	var logger = log.New("secrets.kvstore")
-	var store SecretsKVStore
-	store = NewSQLSecretsKVStore(sqlStore, secretsService, logger)
+	defaultStore := NewSQLSecretsKVStore(sqlStore, secretsService, logger)
 	err := EvaluateRemoteSecretsPlugin(pluginsManager, cfg)
 	if err != nil {
 		logger.Debug(err.Error())
@@ -52,22 +51,22 @@ func ProvideService(
 			// as the plugin is installed, SecretsKVStoreSQL is now replaced with
 			// an instance of secretsKVStorePlugin with the sql store as a fallback
 			// (used for migration and in case a secret is not found).
-			store = &secretsKVStorePlugin{
+			pluginStore := &secretsKVStorePlugin{
 				secretsPlugin:                  secretsPlugin,
 				secretsService:                 secretsService,
 				log:                            logger,
 				kvstore:                        namespacedKVStore,
 				backwardsCompatibilityDisabled: features.IsEnabled(featuremgmt.FlagDisableSecretsCompatibility),
-				fallback:                       store,
 			}
+			return WithFallback(
+				WithCache(pluginStore, 5*time.Second, 5*time.Minute),
+				WithCache(defaultStore, 5*time.Second, 5*time.Minute),
+			), nil
 		}
 	}
 
-	if err != nil {
-		logger.Debug("secrets kvstore is using the default (SQL) implementation for secrets management")
-	}
-
-	return NewCachedKVStore(store, 5*time.Second, 5*time.Minute), nil
+	logger.Debug("secrets kvstore is using the default (SQL) implementation for secrets management")
+	return WithFallback(WithCache(defaultStore, 5*time.Second, 5*time.Minute), nil), nil
 }
 
 // SecretsKVStore is an interface for k/v store.
@@ -78,8 +77,13 @@ type SecretsKVStore interface {
 	Keys(ctx context.Context, orgId int64, namespace string, typ string) ([]Key, error)
 	Rename(ctx context.Context, orgId int64, namespace string, typ string, newNamespace string) error
 	GetAll(ctx context.Context) ([]Item, error)
-	Fallback() SecretsKVStore
-	SetFallback(store SecretsKVStore) error
+}
+
+type FallbackedKVStore interface {
+	SecretsKVStore
+	GetUnwrappedStore() SecretsKVStore
+	GetUnwrappedFallback() SecretsKVStore
+	SetFallback(store SecretsKVStore)
 }
 
 // WithType returns a kvstore wrapper with fixed orgId and type.

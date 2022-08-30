@@ -241,6 +241,7 @@ func SetupFatalCrashTest(
 	shouldFailOnStart bool,
 	isPluginErrorFatal bool,
 	isBackwardsCompatDisabled bool,
+	withFallback bool,
 ) (fatalCrashTestFields, error) {
 	t.Helper()
 	fatalFlagOnce = sync.Once{}
@@ -258,6 +259,9 @@ func SetupFatalCrashTest(
 	t.Cleanup(func() {
 		fatalFlagOnce = sync.Once{}
 	})
+	if !withFallback {
+		svc.SetFallback(nil)
+	}
 	return fatalCrashTestFields{
 		SecretsKVStore: svc,
 		PluginManager:  manager,
@@ -267,7 +271,7 @@ func SetupFatalCrashTest(
 }
 
 type fatalCrashTestFields struct {
-	SecretsKVStore SecretsKVStore
+	SecretsKVStore FallbackedKVStore
 	PluginManager  plugins.SecretsPluginManager
 	KVStore        kvstore.KVStore
 	SqlStore       *sqlstore.SQLStore

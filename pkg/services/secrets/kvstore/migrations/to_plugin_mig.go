@@ -16,7 +16,7 @@ import (
 // MigrateToPluginService This migrator will handle migration of datasource secrets (aka Unified secrets)
 // into the plugin secrets configured
 type MigrateToPluginService struct {
-	secretsStore   secretskvs.SecretsKVStore
+	secretsStore   secretskvs.FallbackedKVStore
 	cfg            *setting.Cfg
 	sqlStore       sqlstore.Store
 	secretsService secrets.Service
@@ -25,7 +25,7 @@ type MigrateToPluginService struct {
 }
 
 func ProvideMigrateToPluginService(
-	secretsStore secretskvs.SecretsKVStore,
+	secretsStore secretskvs.FallbackedKVStore,
 	cfg *setting.Cfg,
 	sqlStore sqlstore.Store,
 	secretsService secrets.Service,
@@ -46,7 +46,8 @@ func (s *MigrateToPluginService) Migrate(ctx context.Context) error {
 	if err := secretskvs.EvaluateRemoteSecretsPlugin(s.manager, s.cfg); err == nil {
 		logger.Debug("starting migration of unified secrets to the plugin")
 		// we need to get the fallback store since in this scenario the secrets store would be the plugin.
-		fallbackStore := s.secretsStore.Fallback()
+		pluginStore := s.secretsStore.GetUnwrappedStore()
+		fallbackStore := s.secretsStore.GetUnwrappedFallback()
 		if fallbackStore == nil {
 			return errors.New("unable to get fallback secret store for migration")
 		}
@@ -67,11 +68,13 @@ func (s *MigrateToPluginService) Migrate(ctx context.Context) error {
 		logger.Debug(fmt.Sprintf("Total amount of secrets to migrate: %d", totalSec))
 		for i, sec := range allSec {
 			logger.Debug(fmt.Sprintf("Migrating secret %d of %d", i+1, totalSec), "current", i+1, "secretCount", totalSec)
-			err = s.secretsStore.Set(ctx, *sec.OrgId, *sec.Namespace, *sec.Type, sec.Value)
+			err = pluginStore.Set(ctx, *sec.OrgId, *sec.Namespace, *sec.Type, sec.Value)
 			if err != nil {
 				return err
 			}
 		}
+
+		s.secretsStore.SetFallback(nil)
 		logger.Debug("migrated unified secrets to plugin", "number of secrets", totalSec)
 		// as no err was returned, when we delete all the secrets from the sql store
 		for index, sec := range allSec {
@@ -94,5 +97,7 @@ func (s *MigrateToPluginService) Migrate(ctx context.Context) error {
 		}
 		logger.Debug("deleted unified secrets after migration", "number of secrets", totalSec)
 	}
+
+	s.secretsStore.SetFallback(nil)
 	return nil
 }

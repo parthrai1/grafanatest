@@ -12,7 +12,7 @@ import (
 // Set fatal flag to true, then simulate a plugin start failure
 // Should result in an error from the secret store provider
 func TestFatalPluginErr_PluginFailsToStartWithFatalFlagSet(t *testing.T) {
-	p, err := SetupFatalCrashTest(t, true, true, false)
+	p, err := SetupFatalCrashTest(t, true, true, false, true)
 	assert.Error(t, err)
 	assert.Equal(t, "mocked failed to start", err.Error())
 	assert.Nil(t, p.SecretsKVStore)
@@ -21,18 +21,18 @@ func TestFatalPluginErr_PluginFailsToStartWithFatalFlagSet(t *testing.T) {
 // Set fatal flag to false, then simulate a plugin start failure
 // Should result in the secret store provider returning the sql impl
 func TestFatalPluginErr_PluginFailsToStartWithFatalFlagNotSet(t *testing.T) {
-	p, err := SetupFatalCrashTest(t, true, false, false)
+	p, err := SetupFatalCrashTest(t, true, false, false, true)
 	assert.NoError(t, err)
-	require.IsType(t, &CachedKVStore{}, p.SecretsKVStore)
+	require.IsType(t, &FallbackKVStore{}, p.SecretsKVStore)
 
-	cachedKv, _ := p.SecretsKVStore.(*CachedKVStore)
+	cachedKv, _ := p.SecretsKVStore.GetUnwrappedStore().(*CachedKVStore)
 	assert.IsType(t, &SecretsKVStoreSQL{}, cachedKv.GetUnwrappedStore())
 }
 
 // With fatal flag not set, store a secret in the plugin while backwards compatibility is disabled
 // Should result in the fatal flag going from unset -> set to true
 func TestFatalPluginErr_FatalFlagGetsSetWithBackwardsCompatDisabled(t *testing.T) {
-	p, err := SetupFatalCrashTest(t, false, false, true)
+	p, err := SetupFatalCrashTest(t, false, false, true, false)
 	assert.NoError(t, err)
 	require.NotNil(t, p.SecretsKVStore)
 
@@ -47,7 +47,7 @@ func TestFatalPluginErr_FatalFlagGetsSetWithBackwardsCompatDisabled(t *testing.T
 // With fatal flag set, retrieve a secret from the plugin while backwards compatibility is enabled
 // Should result in the fatal flag going from set to true -> unset
 func TestFatalPluginErr_FatalFlagGetsUnSetWithBackwardsCompatEnabled(t *testing.T) {
-	p, err := SetupFatalCrashTest(t, false, true, false)
+	p, err := SetupFatalCrashTest(t, false, true, false, false)
 	assert.NoError(t, err)
 	require.NotNil(t, p.SecretsKVStore)
 
