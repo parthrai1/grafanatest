@@ -83,7 +83,7 @@ type FallbackedKVStore interface {
 	SecretsKVStore
 	GetUnwrappedStore() SecretsKVStore
 	GetUnwrappedFallback() SecretsKVStore
-	UseFallback(b bool)
+	UseFallback(b bool) error
 }
 
 // WithType returns a kvstore wrapper with fixed orgId and type.

@@ -53,7 +53,10 @@ func (s *MigrateToPluginService) Migrate(ctx context.Context) error {
 		}
 
 		// during migration use fallback for secret retrieval
-		s.secretsStore.UseFallback(true)
+		err := s.secretsStore.UseFallback(true)
+		if err != nil {
+			return err
+		}
 
 		// before we start migrating, check see if plugin startup failures were already fatal
 		namespacedKVStore := secretskvs.GetNamespacedKVStore(s.kvstore)
@@ -78,7 +81,10 @@ func (s *MigrateToPluginService) Migrate(ctx context.Context) error {
 		}
 
 		// once plugins have moved we can use the plugin, disable fallback
-		s.secretsStore.UseFallback(false)
+		err = s.secretsStore.UseFallback(false)
+		if err != nil {
+			return err
+		}
 
 		// as no err was returned, when we delete all the secrets from the sql store
 		logger.Debug("migrated unified secrets to plugin", "number of secrets", totalSec)
