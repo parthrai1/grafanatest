@@ -93,7 +93,7 @@ func setup(t *testing.T) *testContext {
 
 	sqlStore := sqlstore.InitTestDB(t)
 	secretsService := secretsmng.SetupTestService(t, fakes.NewFakeSecretsStore())
-	ss := secretskvs.WithFallback(secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger")), nil)
+	ss := secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger"))
 	ssvc := secretsmng.SetupTestService(t, fakes.NewFakeSecretsStore())
 	ds := dsSvc.ProvideService(nil, ssvc, ss, nil, featuremgmt.WithFeatures(), acmock.New(), acmock.NewMockedPermissionsService())
 

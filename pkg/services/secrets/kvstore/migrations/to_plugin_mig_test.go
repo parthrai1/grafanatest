@@ -88,7 +88,7 @@ func validateSecretWasStoredInPlugin(t *testing.T, secretsStore secretskvs.Secre
 }
 
 // Set up services used in migration
-func setupTestMigrateToPluginService(t *testing.T) (*MigrateToPluginService, secretskvs.FallbackedKVStore, *secretskvs.SecretsKVStoreSQL) {
+func setupTestMigrateToPluginService(t *testing.T) (*MigrateToPluginService, secretskvs.SecretsKVStore, *secretskvs.SecretsKVStoreSQL) {
 	t.Helper()
 
 	rawCfg := `
@@ -122,7 +122,7 @@ func setupTestMigrateToPluginService(t *testing.T) (*MigrateToPluginService, sec
 
 func setupTestMigratorServiceWithDeletionError(
 	t *testing.T,
-	secretskv secretskvs.FallbackedKVStore,
+	secretskv secretskvs.SecretsKVStore,
 	sqlStore sqlstore.Store,
 	kvstore kvstore.KVStore,
 ) *MigrateToPluginService {

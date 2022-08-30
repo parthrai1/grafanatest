@@ -16,7 +16,7 @@ import (
 // MigrateToPluginService This migrator will handle migration of datasource secrets (aka Unified secrets)
 // into the plugin secrets configured
 type MigrateToPluginService struct {
-	secretsStore   secretskvs.FallbackedKVStore
+	secretsStore   secretskvs.SecretsKVStore
 	cfg            *setting.Cfg
 	sqlStore       sqlstore.Store
 	secretsService secrets.Service
@@ -25,7 +25,7 @@ type MigrateToPluginService struct {
 }
 
 func ProvideMigrateToPluginService(
-	secretsStore secretskvs.FallbackedKVStore,
+	secretsStore secretskvs.SecretsKVStore,
 	cfg *setting.Cfg,
 	sqlStore sqlstore.Store,
 	secretsService secrets.Service,
@@ -46,14 +46,13 @@ func (s *MigrateToPluginService) Migrate(ctx context.Context) error {
 	if err := secretskvs.EvaluateRemoteSecretsPlugin(s.manager, s.cfg); err == nil {
 		logger.Debug("starting migration of unified secrets to the plugin")
 		// we need to get the fallback store since in this scenario the secrets store would be the plugin.
-		pluginStore := s.secretsStore.GetUnwrappedStore()
-		fallbackStore := s.secretsStore.GetUnwrappedFallback()
+		pluginStore, fallbackStore := secretskvs.GetUnwrappedFallback(s.secretsStore)
 		if fallbackStore == nil {
 			return errors.New("unable to get fallback secret store for migration")
 		}
 
 		// during migration use fallback for secret retrieval
-		err := s.secretsStore.UseFallback(true)
+		err = secretskvs.UseFallback(s.secretsStore, true)
 		if err != nil {
 			return err
 		}
@@ -81,7 +80,7 @@ func (s *MigrateToPluginService) Migrate(ctx context.Context) error {
 		}
 
 		// once plugins have moved we can use the plugin, disable fallback
-		err = s.secretsStore.UseFallback(false)
+		err = secretskvs.UseFallback(s.secretsStore, false)
 		if err != nil {
 			return err
 		}

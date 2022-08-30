@@ -11,6 +11,7 @@ import (
 	"github.com/grafana/grafana/pkg/plugins"
 	smp "github.com/grafana/grafana/pkg/plugins/backendplugin/secretsmanagerplugin"
 	"github.com/grafana/grafana/pkg/services/datasources"
+	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/secrets"
 	"github.com/grafana/grafana/pkg/setting"
 )
@@ -29,6 +30,16 @@ type secretsKVStorePlugin struct {
 	secretsService                 secrets.Service
 	kvstore                        *kvstore.NamespacedKVStore
 	backwardsCompatibilityDisabled bool
+}
+
+func NewPluginSecretsKVStore(secretsPlugin smp.SecretsManagerPlugin, secretsService secrets.Service, kvstore *kvstore.NamespacedKVStore, features featuremgmt.FeatureToggles, logger log.Logger) *secretsKVStorePlugin {
+	return &secretsKVStorePlugin{
+		secretsPlugin:                  secretsPlugin,
+		secretsService:                 secretsService,
+		log:                            logger,
+		kvstore:                        kvstore,
+		backwardsCompatibilityDisabled: features.IsEnabled(featuremgmt.FlagDisableSecretsCompatibility),
+	}
 }
 
 // Get an item from the store

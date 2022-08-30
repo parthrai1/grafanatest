@@ -27,7 +27,7 @@ import (
 
 type Service struct {
 	SQLStore           Store
-	SecretsStore       kvstore.FallbackedKVStore
+	SecretsStore       kvstore.SecretsKVStore
 	SecretsService     secrets.Service
 	cfg                *setting.Cfg
 	features           featuremgmt.FeatureToggles
@@ -50,7 +50,7 @@ type cachedRoundTripper struct {
 }
 
 func ProvideService(
-	db db.DB, secretsService secrets.Service, secretsStore kvstore.FallbackedKVStore, cfg *setting.Cfg,
+	db db.DB, secretsService secrets.Service, secretsStore kvstore.SecretsKVStore, cfg *setting.Cfg,
 	features featuremgmt.FeatureToggles, ac accesscontrol.AccessControl, datasourcePermissionsService accesscontrol.DatasourcePermissionsService,
 ) *Service {
 	dslogger := log.New("datasources")

@@ -7,7 +7,10 @@ import (
 	"github.com/grafana/grafana/pkg/infra/log"
 )
 
-var errEmptyFallback = errors.New("secret store fallback is not set")
+var (
+	errEmptyFallback     = errors.New("secret store fallback is not set")
+	errNoFallbackSupport = errors.New("secret store doesn't support fallback")
+)
 
 type FallbackKVStore struct {
 	log         log.Logger
@@ -66,18 +69,20 @@ func (kv *FallbackKVStore) GetAll(ctx context.Context) ([]Item, error) {
 	return kv.store.GetAll(ctx)
 }
 
-func (kv *FallbackKVStore) GetUnwrappedStore() SecretsKVStore {
-	return kv.store
-}
-
-func (kv *FallbackKVStore) GetUnwrappedFallback() SecretsKVStore {
-	return kv.fallback
-}
-
-func (kv *FallbackKVStore) UseFallback(b bool) error {
-	if b && kv.fallback == nil {
-		return errEmptyFallback
+func GetUnwrappedFallback(kv SecretsKVStore) (SecretsKVStore, SecretsKVStore) {
+	if fb, ok := kv.(*FallbackKVStore); ok {
+		return fb.store, fb.fallback
 	}
-	kv.useFallback = b
-	return nil
+	return nil, nil
+}
+
+func UseFallback(kv SecretsKVStore, useFallback bool) error {
+	if fb, ok := kv.(*FallbackKVStore); ok {
+		if fb.fallback == nil {
+			return errEmptyFallback
+		}
+		fb.useFallback = useFallback
+		return nil
+	}
+	return errNoFallbackSupport
 }

@@ -81,6 +81,9 @@ func (kv *CachedKVStore) GetAll(ctx context.Context) ([]Item, error) {
 	return kv.store.GetAll(ctx)
 }
 
-func (kv *CachedKVStore) GetUnwrappedStore() SecretsKVStore {
-	return kv.store
+func GetUnwrappedCache(kv SecretsKVStore) SecretsKVStore {
+	if fb, ok := kv.(*CachedKVStore); ok {
+		return fb.store
+	}
+	return nil
 }

@@ -265,7 +265,7 @@ func SetupFatalCrashTest(
 }
 
 type fatalCrashTestFields struct {
-	SecretsKVStore FallbackedKVStore
+	SecretsKVStore SecretsKVStore
 	PluginManager  plugins.SecretsPluginManager
 	KVStore        kvstore.KVStore
 	SqlStore       *sqlstore.SQLStore
@@ -289,7 +289,7 @@ func TestCleanup(t *testing.T) {
 	})
 }
 
-func ReplaceFallback(t *testing.T, store FallbackedKVStore, fallback SecretsKVStore) {
+func ReplaceFallback(t *testing.T, store SecretsKVStore, fallback SecretsKVStore) {
 	t.Helper()
 	store.(*FallbackKVStore).fallback = fallback
 }

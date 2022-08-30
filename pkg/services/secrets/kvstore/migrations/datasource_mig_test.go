@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func SetupTestDataSourceSecretMigrationService(t *testing.T, sqlStore *sqlstore.SQLStore, kvStore kvstore.KVStore, secretsStore secretskvs.FallbackedKVStore, compatibility bool) *DataSourceSecretMigrationService {
+func SetupTestDataSourceSecretMigrationService(t *testing.T, sqlStore *sqlstore.SQLStore, kvStore kvstore.KVStore, secretsStore secretskvs.SecretsKVStore, compatibility bool) *DataSourceSecretMigrationService {
 	t.Helper()
 	cfg := &setting.Cfg{}
 	features := featuremgmt.WithFeatures()
@@ -36,7 +36,7 @@ func TestMigrate(t *testing.T) {
 		sqlStore := sqlstore.InitTestDB(t)
 		kvStore := kvstore.ProvideService(sqlStore)
 		secretsService := secretsmng.SetupTestService(t, fakes.NewFakeSecretsStore())
-		secretsStore := secretskvs.WithFallback(secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger")), nil)
+		secretsStore := secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger"))
 		migService := SetupTestDataSourceSecretMigrationService(t, sqlStore, kvStore, secretsStore, false)
 		ds := dsservice.CreateStore(sqlStore)
 		dataSourceName := "Test"
@@ -100,7 +100,7 @@ func TestMigrate(t *testing.T) {
 		sqlStore := sqlstore.InitTestDB(t)
 		kvStore := kvstore.ProvideService(sqlStore)
 		secretsService := secretsmng.SetupTestService(t, fakes.NewFakeSecretsStore())
-		secretsStore := secretskvs.WithFallback(secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger")), nil)
+		secretsStore := secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger"))
 		migService := SetupTestDataSourceSecretMigrationService(t, sqlStore, kvStore, secretsStore, true)
 		ds := dsservice.CreateStore(sqlStore)
 		dataSourceName := "Test"
@@ -167,7 +167,7 @@ func TestMigrate(t *testing.T) {
 
 		kvStore := kvstore.ProvideService(sqlStore)
 		secretsService := secretsmng.SetupTestService(t, fakes.NewFakeSecretsStore())
-		secretsStore := secretskvs.WithFallback(secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger")), nil)
+		secretsStore := secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger"))
 		migService := SetupTestDataSourceSecretMigrationService(t, sqlStore, kvStore, secretsStore, false)
 		ds := dsservice.CreateStore(sqlStore)
 
@@ -258,7 +258,7 @@ func TestMigrate(t *testing.T) {
 		sqlStore := sqlstore.InitTestDB(t)
 		kvStore := kvstore.ProvideService(sqlStore)
 		secretsService := secretsmng.SetupTestService(t, fakes.NewFakeSecretsStore())
-		secretsStore := secretskvs.WithFallback(secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger")), nil)
+		secretsStore := secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger"))
 		migService := SetupTestDataSourceSecretMigrationService(t, sqlStore, kvStore, secretsStore, true)
 		ds := dsservice.CreateStore(sqlStore)
 

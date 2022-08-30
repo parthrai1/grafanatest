@@ -26,7 +26,7 @@ func ProvideService(
 	kvstore kvstore.KVStore,
 	features featuremgmt.FeatureToggles,
 	cfg *setting.Cfg,
-) (FallbackedKVStore, error) {
+) (SecretsKVStore, error) {
 	var logger = log.New("secrets.kvstore")
 	defaultStore := NewSQLSecretsKVStore(sqlStore, secretsService, logger)
 	err := EvaluateRemoteSecretsPlugin(pluginsManager, cfg)
@@ -51,13 +51,7 @@ func ProvideService(
 			// as the plugin is installed, SecretsKVStoreSQL is now replaced with
 			// an instance of secretsKVStorePlugin with the sql store as a fallback
 			// (used for migration and in case a secret is not found).
-			pluginStore := &secretsKVStorePlugin{
-				secretsPlugin:                  secretsPlugin,
-				secretsService:                 secretsService,
-				log:                            logger,
-				kvstore:                        namespacedKVStore,
-				backwardsCompatibilityDisabled: features.IsEnabled(featuremgmt.FlagDisableSecretsCompatibility),
-			}
+			pluginStore := NewPluginSecretsKVStore(secretsPlugin, secretsService, namespacedKVStore, features, logger)
 			return WithFallback(
 				WithCache(pluginStore, 5*time.Second, 5*time.Minute),
 				WithCache(defaultStore, 5*time.Second, 5*time.Minute),
@@ -65,7 +59,10 @@ func ProvideService(
 		}
 	}
 
-	logger.Debug("secrets kvstore is using the default (SQL) implementation for secrets management")
+	if err != nil {
+		logger.Debug("secrets kvstore is using the default (SQL) implementation for secrets management")
+	}
+
 	return WithFallback(WithCache(defaultStore, 5*time.Second, 5*time.Minute), nil), nil
 }
 
@@ -77,13 +74,6 @@ type SecretsKVStore interface {
 	Keys(ctx context.Context, orgId int64, namespace string, typ string) ([]Key, error)
 	Rename(ctx context.Context, orgId int64, namespace string, typ string, newNamespace string) error
 	GetAll(ctx context.Context) ([]Item, error)
-}
-
-type FallbackedKVStore interface {
-	SecretsKVStore
-	GetUnwrappedStore() SecretsKVStore
-	GetUnwrappedFallback() SecretsKVStore
-	UseFallback(b bool) error
 }
 
 // WithType returns a kvstore wrapper with fixed orgId and type.
