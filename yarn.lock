@@ -5001,7 +5001,7 @@ __metadata:
     "@grafana/ui": 9.2.0-pre
     "@rollup/plugin-commonjs": 22.0.1
     "@rollup/plugin-node-resolve": 13.3.0
-    "@sentry/browser": 6.19.7
+    "@sentry/browser": 7.12.0
     "@testing-library/dom": 8.13.0
     "@testing-library/react": 12.1.4
     "@testing-library/user-event": 14.4.3
@@ -5208,7 +5208,7 @@ __metadata:
     "@react-aria/utils": 3.13.1
     "@react-stately/menu": 3.3.1
     "@rollup/plugin-node-resolve": 13.3.0
-    "@sentry/browser": 6.19.7
+    "@sentry/browser": 7.12.0
     "@storybook/addon-a11y": 6.4.21
     "@storybook/addon-actions": 6.4.21
     "@storybook/addon-docs": 6.4.21
@@ -8707,67 +8707,55 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/browser@npm:6.19.7"
+"@sentry/browser@npm:7.12.0":
+  version: 7.12.0
+  resolution: "@sentry/browser@npm:7.12.0"
   dependencies:
-    "@sentry/core": 6.19.7
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
+    "@sentry/core": 7.12.0
+    "@sentry/types": 7.12.0
+    "@sentry/utils": 7.12.0
     tslib: ^1.9.3
-  checksum: 071d00c76c2d0384580474c634c58c6196bbd1a3cf510da1309bd1565c57df7422fca8ceb717db189fa557f2c711a21664ee1ab935dfd9869faf416d388e6f78
+  checksum: ea907d5786932bb93fa7dc3d457730d2bab114f8dd80a62c431d94f39ee52dc7a1ac5d99619ec1b709a5136f0512aa61a882ee625e26673d721e6ede620919ff
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/core@npm:6.19.7"
+"@sentry/core@npm:7.12.0":
+  version: 7.12.0
+  resolution: "@sentry/core@npm:7.12.0"
   dependencies:
-    "@sentry/hub": 6.19.7
-    "@sentry/minimal": 6.19.7
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
+    "@sentry/hub": 7.12.0
+    "@sentry/types": 7.12.0
+    "@sentry/utils": 7.12.0
     tslib: ^1.9.3
-  checksum: d212e8ef07114549de4a93b81f8bfa217ca1550ca7a5eeaa611e5629faef78ff72663ce561ffa2cff48f3dc556745ef65177044f9965cdd3cbccf617cf3bf675
+  checksum: 09940e8bae031a278bdbd41ea9af04b27c49b58943e0c6e0ac4f4242d9df295772b08555a43e1522255705a065e38a835cbed05c02130323ecdece5fbfbed89d
   languageName: node
   linkType: hard
 
-"@sentry/hub@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/hub@npm:6.19.7"
+"@sentry/hub@npm:7.12.0":
+  version: 7.12.0
+  resolution: "@sentry/hub@npm:7.12.0"
   dependencies:
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
+    "@sentry/types": 7.12.0
+    "@sentry/utils": 7.12.0
     tslib: ^1.9.3
-  checksum: 10bb1c5cba1b0f1e27a3dd0a186c22f94aeaf11c4662890ab07b2774f46f46af78d61e3ba71d76edc750a7b45af86edd032f35efecdb4efa2eaf551080ccdcb1
+  checksum: 2ac7f3e31a68bbb8abd2f4d284c480bd36d3207ebfb20c7c7f052bea6e5744e3075d6ba10d804cae3cd2077b2ec97cd8ce5fee2d965bdb8f1a3bd754d4d6ba77
   languageName: node
   linkType: hard
 
-"@sentry/minimal@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/minimal@npm:6.19.7"
-  dependencies:
-    "@sentry/hub": 6.19.7
-    "@sentry/types": 6.19.7
-    tslib: ^1.9.3
-  checksum: 9153ac426ee056fc34c5be898f83d74ec08f559d69f544c5944ec05e584b62ed356b92d1a9b08993a7022ad42b5661c3d72881221adc19bee5fc1af3ad3864a8
+"@sentry/types@npm:7.12.0":
+  version: 7.12.0
+  resolution: "@sentry/types@npm:7.12.0"
+  checksum: e726e13330893ed4a45fec81760d86cfba538983540c542d98493fed5c648372cdbc1d3cd46526f6a62853998ed1caa802b6dd815929977f044afadf5ef426aa
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/types@npm:6.19.7"
-  checksum: f46ef74a33376ad6ea9b128115515c58eb9369d89293c60aa67abca26b5d5d519aa4d0a736db56ae0d75ffd816643d62187018298523cbc2e6c2fb3a6b2a9035
-  languageName: node
-  linkType: hard
-
-"@sentry/utils@npm:6.19.7":
-  version: 6.19.7
-  resolution: "@sentry/utils@npm:6.19.7"
+"@sentry/utils@npm:7.12.0":
+  version: 7.12.0
+  resolution: "@sentry/utils@npm:7.12.0"
   dependencies:
-    "@sentry/types": 6.19.7
+    "@sentry/types": 7.12.0
     tslib: ^1.9.3
-  checksum: a000223b9c646c64e3565e79cace1eeb75114342b768367c4dddd646476c215eb1bddfb70c63f05e2352d3bce2d7d415344e4757a001605d0e01ac74da5dd306
+  checksum: 13966bf20ee3f1bee8c18cf057ef67746a52448597ccbdd47613b0912fe9cbd2cfca4e4d82d7b22d0206aa132d56e773cfa30426fc26308b6f95e84097b29110
   languageName: node
   linkType: hard
 
@@ -21806,9 +21794,9 @@ __metadata:
     "@react-types/shared": 3.13.1
     "@reduxjs/toolkit": 1.8.3
     "@rtsao/plugin-proposal-class-properties": 7.0.1-patch.1
-    "@sentry/browser": 6.19.7
-    "@sentry/types": 6.19.7
-    "@sentry/utils": 6.19.7
+    "@sentry/browser": 7.12.0
+    "@sentry/types": 7.12.0
+    "@sentry/utils": 7.12.0
     "@swc/core": 1.2.219
     "@swc/helpers": 0.4.3
     "@testing-library/dom": 8.13.0
