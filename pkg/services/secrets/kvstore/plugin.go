@@ -164,6 +164,10 @@ func (kv *SecretsKVStorePlugin) Rename(ctx context.Context, orgId int64, namespa
 }
 
 func (kv *SecretsKVStorePlugin) GetAll(ctx context.Context) ([]Item, error) {
+	if kv.useFallback && kv.fallbackStore != nil {
+		return kv.fallbackStore.GetAll(ctx)
+	}
+
 	req := &smp.GetAllSecretsRequest{}
 
 	res, err := kv.secretsPlugin.GetAllSecrets(ctx, req)
