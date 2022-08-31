@@ -291,5 +291,11 @@ func TestCleanup(t *testing.T) {
 
 func ReplaceFallback(t *testing.T, store SecretsKVStore, fallback SecretsKVStore) {
 	t.Helper()
-	store.(*FallbackKVStore).fallback = fallback
+	unwrapped := GetUnwrappedCache(store)
+	if unwrapped != nil {
+		store = unwrapped
+	}
+	if rp, ok := store.(*SecretsKVStorePlugin); ok {
+		rp.fallbackStore = fallback
+	}
 }

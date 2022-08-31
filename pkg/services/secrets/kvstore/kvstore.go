@@ -51,11 +51,8 @@ func ProvideService(
 			// as the plugin is installed, SecretsKVStoreSQL is now replaced with
 			// an instance of secretsKVStorePlugin with the sql store as a fallback
 			// (used for migration and in case a secret is not found).
-			pluginStore := NewPluginSecretsKVStore(secretsPlugin, secretsService, namespacedKVStore, features, logger)
-			return WithFallback(
-				WithCache(pluginStore, 5*time.Second, 5*time.Minute),
-				WithCache(defaultStore, 5*time.Second, 5*time.Minute),
-			), nil
+			pluginStore := NewPluginSecretsKVStore(secretsPlugin, secretsService, namespacedKVStore, features, logger, WithCache(defaultStore, 5*time.Second, 5*time.Minute))
+			return WithCache(pluginStore, 5*time.Second, 5*time.Minute), nil
 		}
 	}
 
@@ -63,7 +60,7 @@ func ProvideService(
 		logger.Debug("secrets kvstore is using the default (SQL) implementation for secrets management")
 	}
 
-	return WithFallback(WithCache(defaultStore, 5*time.Second, 5*time.Minute), nil), nil
+	return WithCache(defaultStore, 5*time.Second, 5*time.Minute), nil
 }
 
 // SecretsKVStore is an interface for k/v store.

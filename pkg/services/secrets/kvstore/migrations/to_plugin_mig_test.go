@@ -2,7 +2,6 @@ package migrations
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/grafana/grafana/pkg/infra/kvstore"
@@ -11,7 +10,6 @@ import (
 	secretskvs "github.com/grafana/grafana/pkg/services/secrets/kvstore"
 	secretsManager "github.com/grafana/grafana/pkg/services/secrets/manager"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
-	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -53,9 +51,7 @@ func TestFatalPluginErr_MigrationTestWithErrorDeletingUnifiedSecrets(t *testing.
 	p, err := secretskvs.SetupFatalCrashTest(t, false, false, true)
 	assert.NoError(t, err)
 
-	migration := setupTestMigratorServiceWithDeletionError(t, p.SecretsKVStore, &mockstore.SQLStoreMock{
-		ExpectedError: errors.New("random error"),
-	}, p.KVStore)
+	migration := setupTestMigratorServiceWithDeletionError(t, p.SecretsKVStore, p.KVStore)
 	err = migration.Migrate(context.Background())
 	assert.Error(t, err)
 	assert.Equal(t, "mocked del error", err.Error())
@@ -102,18 +98,21 @@ func setupTestMigrateToPluginService(t *testing.T) (*MigrateToPluginService, sec
 	// this is to init the sql secret store inside the migration
 	sqlStore := sqlstore.InitTestDB(t)
 	secretsService := secretsManager.SetupTestService(t, fakes.NewFakeSecretsStore())
+	kvs := kvstore.ProvideService(sqlStore)
 
 	// this would be the plugin - mocked at the moment
 	secretsSql := secretskvs.NewSQLSecretsKVStore(sqlStore, secretsService, log.New("test.logger"))
-	secretsStoreForPlugin := secretskvs.WithFallback(secretskvs.NewFakeSecretsKVStore(), secretsSql)
 
 	manager := secretskvs.NewFakeSecretsPluginManager(t, false)
+
+	secretsStoreForPlugin := secretskvs.NewPluginSecretsKVStore(manager.SecretsManager().SecretsManager, secretsService,
+		secretskvs.GetNamespacedKVStore(kvs), secretskvs.NewFakeFeatureToggles(t, false), log.New("mig-test"), secretsSql)
+	// secretsStoreForPlugin.SetFallback(secretsSql)
 	migratorService := ProvideMigrateToPluginService(
 		secretsStoreForPlugin,
 		cfg,
-		sqlStore,
 		secretsService,
-		kvstore.ProvideService(sqlStore),
+		kvs,
 		manager,
 	)
 
@@ -123,7 +122,6 @@ func setupTestMigrateToPluginService(t *testing.T) (*MigrateToPluginService, sec
 func setupTestMigratorServiceWithDeletionError(
 	t *testing.T,
 	secretskv secretskvs.SecretsKVStore,
-	sqlStore sqlstore.Store,
 	kvstore kvstore.KVStore,
 ) *MigrateToPluginService {
 	t.Helper()
@@ -134,7 +132,6 @@ func setupTestMigratorServiceWithDeletionError(
 	migratorService := ProvideMigrateToPluginService(
 		secretskv,
 		cfg,
-		sqlStore,
 		secretsService,
 		kvstore,
 		manager,
