@@ -32,6 +32,7 @@ interface Props {
   history?: Array<HistoryItem<DataQuery>>;
   eventBus?: EventBusExtended;
   trackActions?: TrackActions;
+  onDatasourceChange?: (dataSource: DataSourceInstanceSettings, query: DataQuery) => void;
 }
 
 export class QueryEditorRows extends PureComponent<Props> {
@@ -55,6 +56,10 @@ export class QueryEditorRows extends PureComponent<Props> {
 
   onDataSourceChange(dataSource: DataSourceInstanceSettings, index: number) {
     const { queries, onQueriesChange } = this.props;
+
+    if (this.props.onDatasourceChange) {
+      this.props.onDatasourceChange(dataSource, queries[index]);
+    }
 
     onQueriesChange(
       queries.map((item, itemIndex) => {
